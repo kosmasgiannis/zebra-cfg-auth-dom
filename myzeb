@@ -1,0 +1,196 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          zebrasrv-2.0
+# Required-Start:    $local_fs $remote_fs $network $named $time
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Controls the zebrasrv daemon
+# Description:       Controls the zebrasrv /usr/bin/zebrasrv.
+### END INIT INFO
+
+# On servers getting their address from a DHCP server it might be useful to add in /etc/network/interfaces
+# the line:
+# post-up /etc/init.d/myzeb restart
+
+# Do NOT "set -e"
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+NAME=zebrasrv-2.0
+DAEMON=/usr/bin/$NAME
+SCRIPTNAME=/etc/init.d/myzeb
+
+# ReqStart:    $local_fs $remote_fs $network $named $time
+
+
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+ZEBRASRV_BIN=/usr/bin/$NAME
+catfile=/etc/myzeb-catalogue
+
+PS="ps -o pid -o pid= -o comm= -p ";
+
+if [ ! -x $ZEBRASRV_BIN ]; then
+    echo "Zebra is not installed in '$ZEBRASRV_BIN'"
+    exit 0
+fi
+
+if [ ! -f $catfile ]; then
+    echo "Zebra catalogue is missing"
+    exit 0
+fi
+
+service=$2
+
+case "$1" in
+    start)
+	while read line; do
+	    line=`echo "$line" | sed 's/#.*//'`
+	    line=`echo "$line" | sed 's/[ \t]*$//'`
+	    if [ "x$line" != x ]; then
+		set $line; tag=$1; usergroup=$2; dir=$3; file=$4; listen=$5;
+	        help=`echo "$usergroup" | sed 's/\// /'`
+                set $help; user=$1; group=$2;
+		#echo "tag='$tag', dir='$dir', file='$file', user='$user', group='$group'"
+
+		logfile="$dir/log/zebrasrv-$tag.log"
+		pidfile="$dir/lock/zebrasrv-$tag.pid"
+                if [ "x$service" = "x" ]  || [ "x$service" = "x$tag" ]; then
+
+		    if [ -f $pidfile ]; then
+			echo "Zebra service '$tag' seems to be already running"
+			continue
+		    fi
+                    if [ ! -f $dir/$file ]; then
+			echo "Zebra service '$tag' '$file' seems to be missing"
+			continue
+		    fi
+		    echo -n "Starting Zebra service '$tag' ... "
+		    case "$file" in
+		      *.xml) opt="-f $file";;
+		      *.cfg) opt="-c $file $listen";;
+		      *) echo -n "error : Unrecognised Zebra config-file type: '$file'";;
+		    esac
+
+	            if [ "x$opt" != x ]; then
+                        start-stop-daemon --start --quiet --background --pidfile $pidfile -g $group --exec $ZEBRASRV_BIN -- -w $dir -u $user -l $logfile -v all,debug -p $pidfile $opt;
+                        sleep 1
+                        if  [ -f $pidfile ] ; then
+                            echo -n "started"
+                        else
+                            echo -n "error"
+                        fi
+		    fi
+                    echo
+	        fi
+	    fi
+	done < $catfile
+	;;
+
+    stop)
+	# Unfortunate partial duplication of parsing code here
+	while read line; do
+	    line=`echo "$line" | sed 's/#.*//'`
+	    line=`echo "$line" | sed 's/[ \t]*$//'`
+	    if [ "x$line" != x ]; then
+		set $line; tag=$1; usergroup=$2; dir=$3; file=$4; listen=$5;
+	        help=`echo "$usergroup" | sed 's/\// /'`
+                set $help; user=$1; group=$2;
+		#echo "tag='$tag', dir='$dir', file='$file', user='$user', group='$group'"
+                if [ "x$service" = "x" ]  || [ "x$service" = "x$tag" ]; then
+
+		    pidfile="$dir/lock/zebrasrv-$tag.pid"
+		    if [ ! -f $pidfile ]; then
+			    echo "Zebra service '$tag' does not seem to be running"
+			    continue
+		    fi
+
+		    pid=`cat $pidfile`
+                    #echo $pid
+                    #res=`$PS $pid | sed 's/.*PID[ \t\r\n]*//'`;
+                    #echo $res
+                    echo -n "Stopping Zebra service '$tag' pid='$pid' "
+
+                    start-stop-daemon --stop --quiet  --retry=TERM/30/KILL/5 --oknodo -g $group --pidfile $pidfile --name $NAME ;
+    
+                    res=`$PS $pid | sed 's/.*PID[ \t\r\n]*//'`;
+                    #echo $res
+
+                    if  [ "x$res" != "x" ]; then 
+                        echo -n "running "
+                    else
+                        echo -n "killed "
+		        rm $pidfile
+                    fi
+                    echo ''
+#                   if  $PS $pid > /dev/null 2>&1 ; then
+#                   echo "Stopping Zebra service '$tag' pid='$pid'"
+#                   awkcmd='{ if ( \$2 == '$pid' ) { print \$1 }}'
+#                   for child in `ps -o pid --ppid $pid`
+#                   do
+#                     if [ $child != "PID" ]; then
+#                         echo "Killing child process $child because ppid = $pid"
+#                         #kill $child
+#                     fi
+#                   done
+#                   #kill $pid
+#                   echo "kill $pid"
+#                   #rm $pidfile
+#                   fi
+	        fi
+	    fi
+	done < $catfile
+	;;
+  verify)
+	while read line; do
+	    line=`echo "$line" | sed 's/#.*//'`
+	    line=`echo "$line" | sed 's/[ \t]*$//'`
+	    if [ "x$line" != x ]; then
+		set $line; tag=$1; usergroup=$2; dir=$3; file=$4; listen=$5;
+	        help=`echo "$usergroup" | sed 's/\// /'`
+                set $help; user=$1; group=$2;
+		#echo "tag='$tag', dir='$dir', file='$file', user='$user', group='$group'"
+                if [ "x$service" = "x" ]  || [ "x$service" = "x$tag" ]; then
+                    echo -n "Verifing zebra: "
+                    echo -n "$tag " ;
+		    pidfile="$dir/lock/zebrasrv-$tag.pid"
+                    
+                    if  [ -f $pidfile ] ; then
+
+		        pid=`cat $pidfile`
+                        res=`$PS $pid | sed 's/.*PID[ \t\r\n]*//'`;
+
+                        if  [ "x$res" != "x" ]; then 
+                            echo -n "running "
+                        else
+                            echo -n "killed "
+		            rm $pidfile
+                        fi
+                    else
+                        echo -n "stopped "
+                    fi
+                    echo
+	        fi
+	    fi
+	done < $catfile
+        ;;
+    restart)
+	$0 stop $service 
+        sleep 2
+        $0 start $service
+	;;
+    *)
+	echo "Usage: $0 start|stop|verify|restart" >&2
+        ;;
+esac
+
+:

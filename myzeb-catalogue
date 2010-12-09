@@ -1,0 +1,18 @@
+# Myzeb catalogue -- specifies which Zebra services the
+# /etc/init.d/myzeb script should start up and and shut down.
+#
+# Based on indexdata's idzebra-init script (found in idzebra git repository)
+#
+# Comments, introduced by the hash character (#) are ignored, and
+# blank lines are ignored.  Every line describes a single Zebra
+# service.  Each such line consist of five whitespace-separated
+# fields:
+#    a. one short tag used to make service-specific filenames,
+#    b. user and group, separated by a slash, under which the daemon process will run
+#    c. the path to the directory that Zebra should run in, 
+#    d. the name of the master configuration file of the service's configuration
+#       (relative to the directory)
+#    e. optional listen address (unix socket or tcp port, default is tcp:@:9999). 
+#
+bib kosmas/users /home/kosmas/bib gfs.xml
+auth kosmas/users /home/kosmas/auth gfs.xml
