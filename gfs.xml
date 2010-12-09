@@ -1,0 +1,58 @@
+<yazgfs>
+<!-- [scheme:]host[:port][/databaseName] -->
+<!-- scheme: tcp, ssl, unix, http, sru -->
+<!-- can run all servers on tcp, but the unix socket is faster -->
+
+  <listen id="authserver">tcp:@:9998</listen>
+
+  <!-- BIBLIOGRAPHIC  RECORDS -->
+  <server id="authserver">
+    <!-- <directory>/home/kosmas/myzeb</directory> -->
+    <!-- <directory>C:/kosmas/myzeb</directory> -->
+    <directory>./</directory>
+    <config>./zebra.cfg</config>
+    <cql2rpn>./etc/pqf.properties</cql2rpn>
+     <!-- <docpath>xsl</docpath> -->
+     <!-- <stylesheet>xslt/default.xsl</stylesheet> -->
+     <!-- <maximumrecordsize>2000000</maximumrecordsize> -->
+    <xi:include href="./etc/retrieval-info-auth-dom.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude">
+      <xi:fallback>
+        <retrievalinfo>
+          <retrieval syntax="xml" name="F" identifier="info:srw/schema/1/marcxml-v1.1"/>
+          <retrieval syntax="xml" name="B" identifier="info:srw/schema/1/marcxml-v1.1"/>
+          <retrieval syntax="xml" name="marcxml" identifier="info:srw/schema/1/marcxml-v1.1"/>
+          <retrieval syntax="xml" name="marc" identifier="info:srw/schema/1/marcxml-v1.1"/>
+
+          <retrieval syntax="usmarc" name="F">
+            <backend syntax="xml" name="F">
+              <marc inputformat="xml" outputformat="marc"
+                    inputcharset="utf-8"
+                    outputcharset="utf-8"/>
+            </backend>
+          </retrieval>
+          <retrieval syntax="usmarc" name="B">
+            <backend syntax="xml" name="B">
+              <marc inputformat="xml" outputformat="marc"
+                    inputcharset="utf-8"
+                    outputcharset="utf-8"/>
+            </backend>
+          </retrieval>
+          <retrieval syntax="xml" name="zebra::meta"/> <!-- allow viewing zebra meta -->
+        </retrievalinfo>
+      </xi:fallback>
+    </xi:include>
+    <xi:include href="./etc/explain-authorities.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude">
+      <xi:fallback>
+        <explain xmlns="http://explain.z3950.org/dtd/2.0/">
+          <serverInfo>
+            <host>__SRU_AUTH_HOST__</host>
+            <port>__SRU_AUTH_PORT__</port>
+            <database>__SRU_AUTH_DATABASE__</database>
+          </serverInfo>
+        </explain>
+      </xi:fallback>
+    </xi:include>
+  </server>
+</yazgfs>

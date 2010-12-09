@@ -1,0 +1,68 @@
+# Simple Zebra configuration file that defines
+# a database with USMARC records.
+#
+# Where are the config files located?
+# Linux:
+profilePath:.:./etc:./tab:./xsl:/usr/share/idzebra-2.0/tab
+#
+# Windows:
+#profilePath: .:.\tab:.\etc:.\xsl:\Program Files\Zebra2\tab
+
+# modulePath - where to look for loadable zebra modules
+modulePath: /usr/lib/idzebra-2.0/modules
+
+#Windows setting:
+#profilePath: .:.\tab:.\etc:.\xsl::\Program Files\Zebra\tab
+#profilePath: .:.\tab:.\etc:.\xsl:${srcdir:-.}\tab
+
+# Default encoding
+encoding: UTF-8
+
+database: __AUTH_DB__
+
+perm.anonymous:rw
+#perm.__USER__:rw
+#perm.anonymous:ar
+
+# Files that describe the attribute sets supported.
+attset: bib1.att
+attset: explain.att
+
+#systag sysno rank
+
+# Specify record type
+# group   .recordType[  .name  ]:  type
+# type is split into fundamental type. file-read-type . argument
+# http://www.indexdata.dk/zebra/doc/zebra-cfg.tkl
+# http://www.indexdata.dk/zebra/doc/grs.tkl
+# recordtype: dom.etc/dom-config.xml
+recordtype: dom.etc/dom-config-marc.xml
+#iso2709.recordtype: dom.etc/dom-config-marc.xml
+#marcxml.recordtype: dom.etc/dom-config.xml
+#batchmarcxml.recordtype: dom.etc/dom-config-batch.xml
+
+recordId: (bib1,Local-Number)
+
+storeKeys: 1
+storeData: 1
+isam:b
+
+# Shadow File Area
+shadow: ./shadow:8G
+
+# Register File Area
+register: ./register:8G
+
+# Lock File Area
+lockDir: ./lock
+
+# Temp File area for result sets
+setTmpDir: ./tmp
+
+# Temp File area for index program
+keyTmpDir: ./tmp
+
+# Approx. Memory usage during indexing
+memMax: 80M
+
+rank:rank-1
