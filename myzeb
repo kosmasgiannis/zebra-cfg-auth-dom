@@ -82,7 +82,7 @@ case "$1" in
 		    esac
 
 	            if [ "x$opt" != x ]; then
-                        start-stop-daemon --start --quiet --background --pidfile $pidfile -g $group --exec $ZEBRASRV_BIN -- -w $dir -u $user -l $logfile -v all,debug -p $pidfile $opt;
+                        start-stop-daemon --start --quiet --background --pidfile $pidfile -g $group --exec $ZEBRASRV_BIN -- -w $dir -u $user -l $logfile -p $pidfile $opt;
                         sleep 1
                         if  [ -f $pidfile ] ; then
                             echo -n "started"
