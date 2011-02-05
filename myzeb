@@ -67,8 +67,18 @@ case "$1" in
                 if [ "x$service" = "x" ]  || [ "x$service" = "x$tag" ]; then
 
 		    if [ -f $pidfile ]; then
-			echo "Zebra service '$tag' seems to be already running"
-			continue
+			echo -n "Zebra service '$tag' seems to be already running"
+                        pid=`cat $pidfile`
+                        res=`$PS $pid | sed 's/.*PID[ \t\r\n]*//'`;
+
+                        if  [ "x$res" != "x" ]; then
+                            echo ""
+			    continue
+                        else
+                            echo "... no, it was killed."
+                            rm $pidfile
+                        fi
+
 		    fi
                     if [ ! -f $dir/$file ]; then
 			echo "Zebra service '$tag' '$file' seems to be missing"
