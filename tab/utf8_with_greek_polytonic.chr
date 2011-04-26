@@ -184,6 +184,7 @@ map ὧ Ω
 map ῶ Ω
 # mapping diacritics to plain ASCII
 # A
+map ß			(ss)
 map ā			a
 map Ā			a
 map á			a

@@ -29,6 +29,7 @@ equivalent ëē(ee)
 equivalent oóòõôŏǫȯőǒȍȏ
 equivalent Œœöø(oe)
 equivalent ō(oo)
+equivalent ß(ss)
 
 # Supplemental mappings
 # greek capital letters with tonos & dialitika
@@ -57,6 +58,7 @@ map ώ Ω
 map ς Σ
 # mapping diacritics to plain ASCII
 # A
+#map ß			(ss)
 map ā			a
 map Ā			a
 map á			a
