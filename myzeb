@@ -67,7 +67,7 @@ case "$1" in
                 if [ "x$service" = "x" ]  || [ "x$service" = "x$tag" ]; then
 
 		    if [ -f $pidfile ]; then
-			echo -n "Zebra service '$tag' seems to be already running"
+			echo -n "Zebra service '$tag' seems to be activated already"
                         pid=`cat $pidfile`
                         res=`$PS $pid | sed 's/.*PID[ \t\r\n]*//'`;
 
@@ -75,7 +75,7 @@ case "$1" in
                             echo ""
 			    continue
                         else
-                            echo "... no, it was killed."
+                            echo "... Oh no, it was killed."
                             rm $pidfile
                         fi
 
