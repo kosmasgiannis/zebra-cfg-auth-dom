@@ -18,6 +18,7 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 NAME=zebrasrv-2.0
+IDXNAME=zebraidx-2.0
 DAEMON=/usr/bin/$NAME
 SCRIPTNAME=/etc/init.d/myzeb
 
@@ -35,6 +36,7 @@ SCRIPTNAME=/etc/init.d/myzeb
 . /lib/lsb/init-functions
 
 ZEBRASRV_BIN=/usr/bin/$NAME
+ZEBRAIDX_BIN=/usr/bin/$IDXNAME
 catfile=/etc/myzeb-catalogue
 
 PS="ps -o pid -o pid= -o comm= -p ";
@@ -189,6 +191,31 @@ case "$1" in
                         echo -n "stopped "
                     fi
                     echo
+	        fi
+	    fi
+	done < $catfile
+        ;;
+  index)
+	while read line; do
+	    line=`echo "$line" | sed 's/#.*//'`
+	    line=`echo "$line" | sed 's/[ \t]*$//'`
+	    if [ "x$line" != x ]; then
+		set $line; tag=$1; usergroup=$2; dir=$3; file=$4; listen=$5;
+	        help=`echo "$usergroup" | sed 's/\// /'`
+                set $help; user=$1; group=$2;
+		#echo "tag='$tag', dir='$dir', file='$file', user='$user', group='$group'"
+                if [ "x$service" = "x" ]  || [ "x$service" = "x$tag" ]; then
+                    echo "Indexing zebra: $tag "
+	            $0 stop $tag 
+                    sleep 2
+	            DB=`cat "$dir/$file" | grep "database:" | sed 's/^database: *//'`
+                    cd $dir/register
+                    rm -f *.mf
+                    cd $dir
+                    $ZEBRAIDX_BIN -n create $DB
+                    $ZEBRAIDX_BIN -n update records
+                    chown -R $user:$group register
+                    $0 start $tag
 	        fi
 	    fi
 	done < $catfile
