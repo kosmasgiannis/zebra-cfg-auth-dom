@@ -47,6 +47,9 @@ storeKeys: 1
 storeData: 1
 isam:b
 
+# Record compression (none, bzip2 or zlib)
+recordcompression: none
+
 # Shadow File Area
 shadow: ./shadow:8G
 
